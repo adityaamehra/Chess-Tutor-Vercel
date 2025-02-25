@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { MessageSquare } from "lucide-react"
+import ReactMarkdown from "react-markdown"
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([])
@@ -77,13 +77,15 @@ export default function ChatbotPage() {
                     msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                   }`}
                 >
-                  {msg.content}
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-muted rounded-lg px-4 py-2">Thinking...</div>
+                <div className="bg-muted rounded-lg px-4 py-2">
+                  <ReactMarkdown>Thinking...</ReactMarkdown>
+                </div>
               </div>
             )}
           </CardContent>
@@ -118,4 +120,3 @@ export default function ChatbotPage() {
     </div>
   )
 }
-
