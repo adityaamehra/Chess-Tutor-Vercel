@@ -129,9 +129,9 @@ export default function PuzzlesPage() {
           <h3 className="text-xl font-bold">
             {game.turn() === "w" ? "White to move" : "Black to move"}
           </h3>
-          <Button variant="outline" onClick={toggleOrientation}>
+          {/* <Button variant="outline" onClick={toggleOrientation}>
             Flip Board
-          </Button>
+          </Button> */}
         </div>
 
         <div className="mb-6">
