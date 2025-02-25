@@ -75,21 +75,3 @@ export async function analyzeMoveWithAI(fen: string, move: string, evaluation: s
   return response.json()
 }
 
-export async function userMoveAssessment(fen: string, move: string, evaluation: string) {
-  const response = await fetch("/api/chess", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      type: "assessment user",
-      fen,
-      move,
-      evaluation,
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to analyze move")
-  }
-
-  return response.json()
-}
