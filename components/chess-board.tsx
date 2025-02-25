@@ -43,7 +43,7 @@ export function ChessBoard({ position = "start", onMove, orientation = "white", 
         position={game.fen()}
         onPieceDrop={(from, to) => makeMove({ from, to })}
         boardOrientation={orientation}
-        draggable={draggable}
+        arePiecesDraggable={draggable}
       />
     </div>
   )
