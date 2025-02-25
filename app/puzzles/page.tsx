@@ -78,7 +78,7 @@ export default function PuzzlesPage() {
       if (data.isCorrect) {
         if (currentMoveIndex === solution.length - 1) {
           setMessage("Puzzle solved! Loading next puzzle...")
-          setTimeout(loadPuzzle, 1000)
+          setTimeout(loadPuzzle, 1500)
         } else {
           // Increase the index by 2 (user move + opponent move)
           setCurrentMoveIndex(currentMoveIndex + 2)
@@ -93,7 +93,7 @@ export default function PuzzlesPage() {
         setGame(new Chess(game.fen()))
       }
       // Update board orientation after move
-      setOrientation(game.turn() === "w" ? "white" : "black")
+      // setOrientation(game.turn() === "w" ? "white" : "black")
     } catch (error) {
       console.error("Move verification error:", error)
       setMessage(`Error verifying move: ${
@@ -109,11 +109,6 @@ export default function PuzzlesPage() {
     } else {
       setMessage("No more hints available.")
     }
-  }
-
-  // Toggle board orientation manually
-  const toggleOrientation = () => {
-    setOrientation((prev) => (prev === "white" ? "black" : "white"))
   }
 
   return (
