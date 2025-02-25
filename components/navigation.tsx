@@ -33,7 +33,7 @@ export function Navigation() {
   }
 
   return (
-    <nav className={cn(isCollapsed ? "w-16" : "w-64", "min-h-screen border-r bg-muted/30 transition-all")}>
+    <nav className={cn(isCollapsed ? "w-32" : "w-64", "min-h-screen border-r bg-muted/30 transition-all")}>
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           {!isCollapsed && <h2 className="text-lg font-semibold">Navigation</h2>}
@@ -53,7 +53,7 @@ export function Navigation() {
                   pathname === item.href ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                 )}
               >
-                <Icon className="w-8 h-8" />
+                <Icon className="w-4 h-4" />
                 {!isCollapsed && <span>{item.name}</span>}
               </Link>
             )
