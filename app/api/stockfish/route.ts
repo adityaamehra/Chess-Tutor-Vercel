@@ -1,38 +1,67 @@
-import { NextResponse } from "next/server";
-import stockfish from "stockfish";
-import dotenv from 'dotenv';
-dotenv.config();
+// import { NextResponse } from "next/server"
+// import { Stockfish } from "stockfish"
 
-const engine = stockfish();
-engine.onmessage = (event) => console.log(event);
+// const stockfish = new Stockfish(process.env.STOCKFISH_PATH!)
+
+// export async function POST(req: Request) {
+//   try {
+//     const { fen, skill_level } = await req.json()
+
+//     stockfish.set_skill_level(skill_level)
+//     stockfish.set_fen_position(fen)
+//     const best_move = stockfish.get_best_move()
+//     const evaluation = stockfish.get_evaluation()
+
+//     return NextResponse.json({ best_move, evaluation })
+//   } catch (error) {
+//     console.error("Stockfish API Error:", error)
+//     return NextResponse.json({ error: "Failed to process move" }, { status: 500 })
+//   }
+// }
+
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { fen, skill_level } = await req.json();
 
-    engine.postMessage(`setoption name Skill Level value ${skill_level}`);
-    engine.postMessage(`position fen ${fen}`);
-    engine.postMessage("go movetime 1000");
+    // Validate that skill_level (used as depth) is a number and is less than 16.
+    if (typeof skill_level !== "number" || skill_level >= 16) {
+      return NextResponse.json(
+        { success: false, error: "Invalid skill_level; it must be a number less than 16." },
+        { status: 400 }
+      );
+    }
 
-    const best_move = await new Promise((resolve) => {
-      engine.onmessage = (event) => {
-        if (event.includes("bestmove")) {
-          resolve(event.split(" ")[1]);
-        }
-      };
+    // Define the external API endpoint using an environment variable.
+    const apiUrl = process.env.STOCKFISH_API_URL;
+    if (!apiUrl) {
+      return NextResponse.json(
+        { success: false, error: "STOCKFISH_API_URL is not defined." },
+        { status: 500 }
+      );
+    }
+
+    // Send a POST request to the external API with the required parameters.
+    const externalResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fen, depth: skill_level })
     });
 
-    const evaluation = await new Promise((resolve) => {
-      engine.onmessage = (event) => {
-        if (event.includes("info depth")) {
-          resolve(event);
-        }
-      };
-    });
+    // Parse the response from the external API.
+    const apiData = await externalResponse.json();
 
-    return NextResponse.json({ best_move, evaluation });
+    // Extract only the desired keys.
+    const { bestmove, eval: evaluation } = apiData;
+
+    // Return a new JSON object containing only best_move and evaluation.
+    return NextResponse.json({ bestmove, evaluation });
   } catch (error) {
     console.error("Stockfish API Error:", error);
-    return NextResponse.json({ error: "Failed to process move" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to process move" },
+      { status: 500 }
+    );
   }
 }

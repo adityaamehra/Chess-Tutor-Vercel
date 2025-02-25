@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
+import { ChessBoard } from "@/components/chess-board"
 import { Chess } from "chess.js"
-import { Chessboard } from "react-chessboard"
+import { getStockfishMove, getMoveDescription, getEvaluationString, analyzeMoveWithAI } from "@/lib/chess-utils"
 
 export default function PlayPage() {
   const [game, setGame] = useState(new Chess())
@@ -16,34 +17,34 @@ export default function PlayPage() {
   const [userAssessment, setUserAssessment] = useState("")
   const [isThinking, setIsThinking] = useState(false)
 
-  const makeMove = async () => {
+  const makeMove = async (move: string) => {
     try {
-      const move = game.move(userMove)
-      if (!move) {
+      setIsThinking(true)
+      const newGame = new Chess(game.fen())
+      const result = newGame.move(move)
+
+      if (!result) {
         setUserAssessment("Invalid move")
         return
       }
 
-      setIsThinking(true)
-      const response = await fetch("/api/stockfish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fen: game.fen(),
-          skill_level: skillLevel,
-        }),
-      })
+      const { bestMove, evaluation, mate } = await getStockfishMove(newGame.fen(), skillLevel)
+      if (!bestMove) {
+        throw new Error("No best move returned from Stockfish")
+      }
 
-      const data = await response.json()
-      if (data.error) throw new Error(data.error)
+      const moveDescription = getMoveDescription(newGame, bestMove)
+      const evalString = getEvaluationString(evaluation, mate)
 
-      game.move(data.best_move)
-      setGame(new Chess(game.fen()))
-      setAiExplanation(data.explanation)
-      setUserAssessment(data.assessment)
+      const analysis = await analyzeMoveWithAI(newGame.fen(), bestMove, evalString)
+
+      newGame.move(bestMove)
+      setGame(newGame)
+      setAiExplanation(analysis.analysis)
+      setUserAssessment(`Your move: ${moveDescription}`)
     } catch (error) {
       console.error("Move error:", error)
-      setUserAssessment("Error processing move")
+      setUserAssessment(`Error processing move: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {
       setIsThinking(false)
       setUserMove("")
@@ -69,9 +70,7 @@ export default function PlayPage() {
 
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
-              <Chessboard position={game.fen()} boardWidth={600} />
-            </div>
+            <ChessBoard position={game.fen()} onMove={(move) => makeMove(`${move.from}${move.to}`)} />
           </CardContent>
         </Card>
 
@@ -99,7 +98,7 @@ export default function PlayPage() {
             className="flex-1 max-w-xs"
             disabled={isThinking}
           />
-          <Button onClick={makeMove} disabled={isThinking}>
+          <Button onClick={() => makeMove(userMove)} disabled={isThinking}>
             {isThinking ? "Thinking..." : "Make Move"}
           </Button>
         </div>

@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { ChessBoard } from "@/components/chess-board"
 import { Chess } from "chess.js"
-import { Chessboard } from "react-chessboard"
 
 export default function PuzzlesPage() {
   const [difficulty, setDifficulty] = useState("easy")
@@ -15,6 +15,8 @@ export default function PuzzlesPage() {
   const [puzzleRating, setPuzzleRating] = useState(0)
   const [userMove, setUserMove] = useState("")
   const [message, setMessage] = useState("")
+  const [solution, setSolution] = useState<string[]>([])
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0)
 
   const loadPuzzle = useCallback(async () => {
     try {
@@ -27,6 +29,8 @@ export default function PuzzlesPage() {
       newGame.load(data.fen)
       setGame(newGame)
       setPuzzleRating(data.rating)
+      setSolution(data.moves)
+      setCurrentMoveIndex(0)
       setMessage("")
     } catch (error) {
       console.error("Failed to load puzzle:", error)
@@ -38,28 +42,45 @@ export default function PuzzlesPage() {
     loadPuzzle()
   }, [loadPuzzle])
 
-  const handleMove = async () => {
+  const handleMove = async (moveString: string) => {
     try {
-      const move = game.move(userMove)
+      const move = game.move(moveString)
       if (!move) {
         setMessage("Invalid move")
         return
       }
 
-      const response = await fetch("/api/puzzles/verify", {
+      const response = await fetch("/api/puzzles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fen: game.fen(),
-          move: userMove,
-          difficulty,
+          move: moveString,
+          solution: solution[currentMoveIndex],
         }),
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
-      if (data.correct) {
-        setMessage("Correct move!")
-        setTimeout(loadPuzzle, 1500)
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      if (data.isCorrect) {
+        if (currentMoveIndex === solution.length - 1) {
+          setMessage("Puzzle solved! Loading next puzzle...")
+          setTimeout(loadPuzzle, 1500)
+        } else {
+          setCurrentMoveIndex(currentMoveIndex + 1)
+          const opponentMove = solution[currentMoveIndex + 1]
+          game.move(opponentMove)
+          setGame(new Chess(game.fen()))
+          setMessage("Correct move! Continue solving.")
+        }
       } else {
         setMessage("Incorrect move. Try again!")
         game.undo()
@@ -67,9 +88,17 @@ export default function PuzzlesPage() {
       }
     } catch (error) {
       console.error("Move verification error:", error)
-      setMessage("Error verifying move")
+      setMessage(`Error verifying move: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
     setUserMove("")
+  }
+
+  const giveHint = () => {
+    if (solution[currentMoveIndex]) {
+      setMessage(`Hint: ${solution[currentMoveIndex]}`)
+    } else {
+      setMessage("No more hints available.")
+    }
   }
 
   return (
@@ -103,16 +132,22 @@ export default function PuzzlesPage() {
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Puzzle Rating: {puzzleRating}</h3>
             </div>
-            <div style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
-              <Chessboard position={game.fen()} boardWidth={600} />
-            </div>
+            <ChessBoard
+              position={game.fen()}
+              onMove={(move) => {
+                setUserMove(`${move.from}${move.to}`)
+                handleMove(`${move.from}${move.to}`)
+              }}
+            />
           </CardContent>
         </Card>
 
         {message && (
           <div
             className={`mb-4 p-2 rounded ${
-              message.includes("Correct") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              message.includes("Correct") || message.includes("solved")
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
             }`}
           >
             {message}
@@ -126,7 +161,10 @@ export default function PuzzlesPage() {
             placeholder="Enter your move (e.g., e2e4)"
             className="flex-1"
           />
-          <Button onClick={handleMove}>Submit Move</Button>
+          <Button onClick={() => handleMove(userMove)}>Submit Move</Button>
+          <Button variant="outline" onClick={giveHint}>
+            Give Hint
+          </Button>
           <Button variant="outline" onClick={loadPuzzle}>
             Next Puzzle
           </Button>
