@@ -75,7 +75,7 @@ export default function PuzzlesPage() {
           setMessage("Puzzle solved! Loading next puzzle...")
           setTimeout(loadPuzzle, 1500)
         } else {
-          setCurrentMoveIndex(currentMoveIndex + 1)
+          setCurrentMoveIndex(currentMoveIndex + 2)
           const opponentMove = solution[currentMoveIndex + 1]
           game.move(opponentMove)
           setGame(new Chess(game.fen()))

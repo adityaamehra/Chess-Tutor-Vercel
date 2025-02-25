@@ -55,56 +55,33 @@ export async function GET(req: Request) {
     return NextResponse.json({
       fen: board.fen(),
       rating: puzzle.rating,
-      remainingSolution: puzzle.moves.slice(1), // Remove the first move as it's already played
-    });
+      moves: puzzle.moves.slice(1), // Remove the first move as it's already played
+    })
   } catch (error) {
-    console.error("Puzzle API Error:", error);
-    return NextResponse.json({ error: "Failed to load puzzle" }, { status: 500 });
+    console.error("Puzzle API Error:", error)
+    return NextResponse.json({ error: "Failed to load puzzle" }, { status: 500 })
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const { fen, move, remainingSolution } = await req.json();
+    const { fen, move, solution } = await req.json()
 
-    if (!fen || !move || !remainingSolution || !Array.isArray(remainingSolution)) {
-      return NextResponse.json(
-        { error: "Missing or invalid required parameters" },
-        { status: 400 }
-      );
+    if (!fen || !move || !solution) {
+      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
     }
-    const board = new Chess(fen);
-    // Determine whether the user's move is legal.
-    const legalMoves = board.moves({ verbose: true });
-    const isLegal = legalMoves.some((m) => m.from + m.to === move);
 
-    // The expected user move is the first element in the remaining solution array.
-    const expectedUserMove = remainingSolution[0];
-    const isCorrect = move === expectedUserMove;
-
-    if (isLegal && isCorrect) {
-      // Apply the user's move.
-      board.move(move);
-      // Remove the user's move from the solution array.
-      remainingSolution.shift();
-
-      // If a subsequent bot move exists, apply it automatically.
-      if (remainingSolution.length > 0) {
-        const botMove = remainingSolution[0];
-        board.move(botMove);
-        // Remove the bot move from the solution array.
-        remainingSolution.shift();
-      }
-    }
+    const board = new Chess(fen)
+    const isLegal = board.moves({ verbose: true }).some((m) => m.from + m.to === move)
+    const isCorrect = solution === move
 
     return NextResponse.json({
-      fen: board.fen(),
       isLegal,
       isCorrect,
-      remainingSolution,
-    });
+    })
   } catch (error) {
     console.error("Puzzle verification error:", error)
     return NextResponse.json({ error: "Failed to verify move" }, { status: 500 })
   }
 }
+

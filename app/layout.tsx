@@ -9,7 +9,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Chess Tutor",
   description: "Learn chess with AI assistance",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
