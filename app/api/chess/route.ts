@@ -84,7 +84,7 @@ export async function POST(req: Request) {
             {
               role: "system",
               content:
-                "You are a top-tier chess coach. Analyze the given move concisely in 2-3 sentences. Use clear language and focus on key tactical and strategic elements.",
+                "You are a top-tier chess coach. Analyze the given move concisely in 2-3 sentences. Use clear language and focus on key tactical and strategic elements. DO NOT USE MARKDOWN, tell why the move was played and if it was thinkable by a normal man or not.",
             },
             {
               role: "user",
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
           messages: [
             {
               role: "system",
-              content: "You are a chess coach. Answer questions about chess clearly and concisely.",
+              content: "You are a chess coach. Answer questions about chess clearly and concisely. INCLUDE ALL THE THINGS WHICH ARE DEEMED NECESSARY FOR A BEGINNER TO KNOW, IF THE THING IS NOT IN THE CHESS DOMAIN then DO NOT GIVE ANY RESPONSE.",
             },
             {
               role: "user",
