@@ -8,7 +8,7 @@ const client = new Groq({
 
 // Helper function to clean LLM response
 function clean(response: string) {
-  return response.replace(/<think>.*?<\/think>/g, "");
+  return response.replace(/<think>[\s\S]*?<\/think>/g, "");
 }
 
 
