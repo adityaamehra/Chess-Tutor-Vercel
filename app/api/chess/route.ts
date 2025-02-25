@@ -11,7 +11,6 @@ function clean(response: string) {
   return response.replace(/<think>[\s\S]*?<\/think>/g, "");
 }
 
-
 // Helper function to get move info from Stockfish API
 async function getStockfishInfo(fen: string, depth = 15) {
   const url = "https://stockfish.online/api/s/v2.php"
@@ -121,6 +120,27 @@ export async function POST(req: Request) {
         })
       }
 
+      case "assess": {
+        const completion = await client.chat.completions.create({
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a top-tier chess coach with deep strategic and tactical mastery. Your task is to criticize the move that was played with correct information, praise if the move was good and scold if the move was rubbish. Do not use markdown, and the commentary should not exceed 3 lines. DO NOT USE UCI NOTATION but use English. Positive evaluation favors White, and negative favors Black. Do not keep one appreciating the user but be very brutal and mostly be critical to the user, be lightly harsh to the user.",
+            },
+            {
+              role: "user",
+              content: `Assess the move "${move}" in the given position: ${fen}`,
+            },
+          ],
+          model: "deepseek-r1-distill-llama-70b",
+        })
+
+        return NextResponse.json({
+          assessment: clean(completion.choices[0].message.content ?? ""),
+        })
+      }
+
       default:
         return NextResponse.json({ error: "Invalid request type" }, { status: 400 })
     }
@@ -129,4 +149,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to process request" }, { status: 500 })
   }
 }
-

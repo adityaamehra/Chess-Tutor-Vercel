@@ -7,7 +7,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { ChessBoard } from "@/components/chess-board"
 import { Chess } from "chess.js"
-import { getStockfishMove, getMoveDescription, getEvaluationString, analyzeMoveWithAI } from "@/lib/chess-utils"
+import { 
+  getStockfishMove, 
+  getMoveDescription, 
+  getEvaluationString, 
+  analyzeMoveWithAI, 
+  assessMoveWithAI 
+} from "@/lib/chess-utils"
 
 export default function PlayPage() {
   const [game, setGame] = useState(new Chess())
@@ -20,14 +26,19 @@ export default function PlayPage() {
   const makeMove = async (move: string) => {
     try {
       setIsThinking(true)
+      // Create a new instance using the current position
       const newGame = new Chess(game.fen())
+      // Attempt the user's move
       const result = newGame.move(move)
-
       if (!result) {
         setUserAssessment("Invalid move")
         return
       }
 
+      // Get assessment of the user's move
+      const assessmentResponse = await assessMoveWithAI(newGame.fen(), move)
+
+      // Retrieve Stockfish's best move from the updated position
       const { bestMove, evaluation, mate } = await getStockfishMove(newGame.fen(), skillLevel)
       if (!bestMove) {
         throw new Error("No best move returned from Stockfish")
@@ -35,16 +46,20 @@ export default function PlayPage() {
 
       const moveDescription = getMoveDescription(newGame, bestMove)
       const evalString = getEvaluationString(evaluation, mate)
-
       const analysis = await analyzeMoveWithAI(newGame.fen(), bestMove, evalString)
 
+      // Apply Stockfish's best move and update the game state
       newGame.move(bestMove)
       setGame(newGame)
       setAiExplanation(analysis.analysis)
-      setUserAssessment(`Your move: ${moveDescription}`)
+      setUserAssessment(assessmentResponse.assessment)
     } catch (error) {
       console.error("Move error:", error)
-      setUserAssessment(`Error processing move: ${error instanceof Error ? error.message : "Unknown error"}`)
+      setUserAssessment(
+        `Error processing move: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      )
     } finally {
       setIsThinking(false)
       setUserMove("")
@@ -78,14 +93,18 @@ export default function PlayPage() {
           <Card>
             <CardContent className="p-4">
               <h3 className="font-medium mb-2">AI Move Explanation</h3>
-              <p className="text-sm text-muted-foreground">{aiExplanation || "Make a move to see AI's explanation"}</p>
+              <p className="text-sm text-muted-foreground">
+                {aiExplanation || "Make a move to see AI's explanation"}
+              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
               <h3 className="font-medium mb-2">User Move Assessment</h3>
-              <p className="text-sm text-muted-foreground">{userAssessment || "Make a move to see assessment"}</p>
+              <p className="text-sm text-muted-foreground">
+                {userAssessment || "Make a move to see assessment"}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -106,4 +125,3 @@ export default function PlayPage() {
     </div>
   )
 }
-
