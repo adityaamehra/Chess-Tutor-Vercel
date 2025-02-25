@@ -8,7 +8,7 @@ const client = new Groq({
 
 // Helper function to clean LLM response
 function clean(response: string) {
-  return response.replace(/<Thinking>.*?<\/think>/, "")
+  return response.replace(/<think>.*?<\/think>/, "")
 }
 
 // Helper function to get move info from Stockfish API
