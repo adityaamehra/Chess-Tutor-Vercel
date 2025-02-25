@@ -53,7 +53,7 @@ export function Navigation() {
                   pathname === item.href ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                 )}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-8 h-8" />
                 {!isCollapsed && <span>{item.name}</span>}
               </Link>
             )
