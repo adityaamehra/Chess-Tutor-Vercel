@@ -22,8 +22,6 @@ export async function POST(req: Request) {
           content: message,
         },
       ],
-      temperature: 0.7,
-      max_tokens: 500,
     });
 
     return NextResponse.json({ response: chat_completion.choices[0].message.content });

@@ -1,24 +1,3 @@
-// import { NextResponse } from "next/server"
-// import { Stockfish } from "stockfish"
-
-// const stockfish = new Stockfish(process.env.STOCKFISH_PATH!)
-
-// export async function POST(req: Request) {
-//   try {
-//     const { fen, skill_level } = await req.json()
-
-//     stockfish.set_skill_level(skill_level)
-//     stockfish.set_fen_position(fen)
-//     const best_move = stockfish.get_best_move()
-//     const evaluation = stockfish.get_evaluation()
-
-//     return NextResponse.json({ best_move, evaluation })
-//   } catch (error) {
-//     console.error("Stockfish API Error:", error)
-//     return NextResponse.json({ error: "Failed to process move" }, { status: 500 })
-//   }
-// }
-
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {

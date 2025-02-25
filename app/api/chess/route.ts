@@ -8,7 +8,7 @@ const client = new Groq({
 
 // Helper function to clean LLM response
 function clean(response: string) {
-  return response.replace(/<think>.*?<\/think>/, "")
+  return response.replace(/<think>.*?<\/think>/g, "");
 }
 
 // Helper function to get move info from Stockfish API
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     const { type, fen, move } = await req.json()
 
     switch (type) {
-      case "analyze": {
+      case "analyze AI": {
         const info = await getStockfishInfo(fen)
         const moveType = getMoveType(fen, info.bestMove)
         const evaluation = getEvalString(info.evaluation, info.mate)
@@ -83,7 +83,11 @@ export async function POST(req: Request) {
             {
               role: "system",
               content:
-                "You are a top-tier chess coach. Analyze the given move concisely in 2-3 sentences. Use clear language and focus on key tactical and strategic elements.",
+              "You are a top-tier chess coach with deep strategic and tactical mastery. "+
+              "Your task is to give the commentary of the move that was played, the advantages "+
+              "and disadvantages of the move, with correct information. Do not use markdown, " +
+              "and the commentary should not exceed 3 lines. DO NOT USE UCI NOTATION but use English. " +
+              "Positive evaluation favors White, and negative favors Black."
             },
             {
               role: "user",
@@ -100,12 +104,40 @@ export async function POST(req: Request) {
         })
       }
 
+      case "assessment user": {
+        const info = await getStockfishInfo(fen)
+        const p = `Please tell me how is the move which is ${move} with an evaluation of ${getEvalString(info.evaluation, info.mate)} and the type of move is ${getMoveType(fen, move)}.`
+        const completion = await client.chat.completions.create({
+          messages: [
+            {
+              role: "system",
+              content: "You are a top-tier chess coach with deep strategic and tactical mastery. "+
+                        "Your task is to criticize the move that was played with correct information, "+
+                        "praise if the move was good and scold if the move was rubbish. "+
+                        "Do not use markdown, and the commentary should not exceed 3 lines. "+
+                        "DO NOT USE UCI NOTATION but use English. Positive evaluation favors White, "+
+                        "and negative favors Black. "+
+                        "Do not keep one appreciating the user but be very brutal and mostly be critical to the user, be lightly harsh to the user."
+            },
+            {
+              role: "user",
+              content: move,
+            },
+          ],
+          model: "deepseek-r1-distill-llama-70b",
+        })
+
+        return NextResponse.json({
+          response: clean(completion.choices[0].message.content ?? ""),
+        })
+      }
+
       case "chat": {
         const completion = await client.chat.completions.create({
           messages: [
             {
               role: "system",
-              content: "You are a chess coach. Answer questions about chess clearly and concisely.",
+              content: "The input you will be given will be natural language you have to understand what the user is asking and respond accordingly.USE MARKDOWNS AND IT EXPLAIN IT IN DETAIL TO THE ATMOST CORE . YOU ARE GONNA ACT AS A TEACHER AND THINK SUCH THAT THE USER DOES NOT KNOW ANYTHING.",
             },
             {
               role: "user",

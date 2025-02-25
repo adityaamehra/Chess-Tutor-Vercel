@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { ChessBoard } from "@/components/chess-board"
 import { Chess } from "chess.js"
-import { getStockfishMove, getMoveDescription, getEvaluationString, analyzeMoveWithAI } from "@/lib/chess-utils"
+import { getStockfishMove, getMoveDescription, getEvaluationString, analyzeMoveWithAI,userMoveAssessment } from "@/lib/chess-utils"
 
 export default function PlayPage() {
   const [game, setGame] = useState(new Chess())
@@ -27,21 +27,20 @@ export default function PlayPage() {
         setUserAssessment("Invalid move")
         return
       }
-
       const { bestMove, evaluation, mate } = await getStockfishMove(newGame.fen(), skillLevel)
       if (!bestMove) {
         throw new Error("No best move returned from Stockfish")
       }
+      const evalu = getEvaluationString(evaluation, mate)
+      const moveDescription = await userMoveAssessment(newGame.fen(), move, evalu)
 
-      const moveDescription = getMoveDescription(newGame, bestMove)
       const evalString = getEvaluationString(evaluation, mate)
-
       const analysis = await analyzeMoveWithAI(newGame.fen(), bestMove, evalString)
 
       newGame.move(bestMove)
       setGame(newGame)
       setAiExplanation(analysis.analysis)
-      setUserAssessment(`Your move: ${moveDescription}`)
+      setUserAssessment(moveDescription.analysis)
     } catch (error) {
       console.error("Move error:", error)
       setUserAssessment(`Error processing move: ${error instanceof Error ? error.message : "Unknown error"}`)
