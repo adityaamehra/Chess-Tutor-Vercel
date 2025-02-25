@@ -17,6 +17,8 @@ export default function PuzzlesPage() {
   const [message, setMessage] = useState("")
   const [solution, setSolution] = useState<string[]>([])
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0)
+  // Track board orientation; default to white
+  const [orientation, setOrientation] = useState<"white" | "black">("white")
 
   const loadPuzzle = useCallback(async () => {
     try {
@@ -32,6 +34,8 @@ export default function PuzzlesPage() {
       setSolution(data.moves)
       setCurrentMoveIndex(0)
       setMessage("")
+      // Update board orientation based on whose turn it is
+      setOrientation(newGame.turn() === "w" ? "white" : "black")
     } catch (error) {
       console.error("Failed to load puzzle:", error)
       setMessage("Failed to load puzzle. Please try again.")
@@ -44,6 +48,7 @@ export default function PuzzlesPage() {
 
   const handleMove = async (moveString: string) => {
     try {
+      // Try applying the move string to the current game state
       const move = game.move(moveString)
       if (!move) {
         setMessage("Invalid move")
@@ -73,8 +78,9 @@ export default function PuzzlesPage() {
       if (data.isCorrect) {
         if (currentMoveIndex === solution.length - 1) {
           setMessage("Puzzle solved! Loading next puzzle...")
-          setTimeout(loadPuzzle, 1500)
+          setTimeout(loadPuzzle, 1000)
         } else {
+          // Increase the index by 2 (user move + opponent move)
           setCurrentMoveIndex(currentMoveIndex + 2)
           const opponentMove = solution[currentMoveIndex + 1]
           game.move(opponentMove)
@@ -86,9 +92,13 @@ export default function PuzzlesPage() {
         game.undo()
         setGame(new Chess(game.fen()))
       }
+      // Update board orientation after move
+      setOrientation(game.turn() === "w" ? "white" : "black")
     } catch (error) {
       console.error("Move verification error:", error)
-      setMessage(`Error verifying move: ${error instanceof Error ? error.message : "Unknown error"}`)
+      setMessage(`Error verifying move: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`)
     }
     setUserMove("")
   }
@@ -101,12 +111,27 @@ export default function PuzzlesPage() {
     }
   }
 
+  // Toggle board orientation manually
+  const toggleOrientation = () => {
+    setOrientation((prev) => (prev === "white" ? "black" : "white"))
+  }
+
   return (
     <div className="flex-1 p-6">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
           <span className="text-2xl">♟️</span>
           <h1 className="text-2xl font-bold">Chess Puzzle Solver</h1>
+        </div>
+        
+        {/* Header indicating whose turn it is */}
+        <div className="mb-4 text-center">
+          <h3 className="text-xl font-bold">
+            {game.turn() === "w" ? "White to move" : "Black to move"}
+          </h3>
+          <Button variant="outline" onClick={toggleOrientation}>
+            Flip Board
+          </Button>
         </div>
 
         <div className="mb-6">
@@ -134,6 +159,7 @@ export default function PuzzlesPage() {
             </div>
             <ChessBoard
               position={game.fen()}
+              orientation={orientation}
               onMove={(move) => {
                 setUserMove(`${move.from}${move.to}`)
                 handleMove(`${move.from}${move.to}`)
@@ -173,4 +199,3 @@ export default function PuzzlesPage() {
     </div>
   )
 }
-
