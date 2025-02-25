@@ -118,16 +118,6 @@ export default function PuzzlesPage() {
           <span className="text-2xl">♟️</span>
           <h1 className="text-2xl font-bold">Chess Puzzle Solver</h1>
         </div>
-        
-        {/* Header indicating whose turn it is */}
-        <div className="mb-4 text-center">
-          <h3 className="text-xl font-bold">
-            {game.turn() === "w" ? "White to move" : "Black to move"}
-          </h3>
-          {/* <Button variant="outline" onClick={toggleOrientation}>
-            Flip Board
-          </Button> */}
-        </div>
 
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-2">Select Difficulty</h2>
@@ -151,6 +141,7 @@ export default function PuzzlesPage() {
           <CardContent className="p-4">
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Puzzle Rating: {puzzleRating}</h3>
+              <h3 className="text-xl font-bold">{game.turn() === "w" ? "White to move" : "Black to move"}</h3>
             </div>
             <ChessBoard
               position={game.fen()}
