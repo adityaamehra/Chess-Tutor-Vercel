@@ -22,7 +22,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="flex min-h-screen">
           <Navigation />
-          <main className="flex-1">{children}</main>
+            <main className="flex-1 bg-cover bg-center" style={{ backgroundImage: "url('/main_bg.avif')" }}>
+            {children}
+            </main>
         </div>
       </body>
     </html>

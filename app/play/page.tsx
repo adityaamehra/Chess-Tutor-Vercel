@@ -69,21 +69,21 @@ export default function PlayPage() {
   return (
     <div className="flex-1 p-6">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Play Chess vs Stockfish</h1>
+        <h1 className="text-2xl font-bold mb-6 text-slate-200">Play Chess vs Stockfish</h1>
 
         <div className="mb-6">
-          <h2 className="text-sm font-medium mb-2">Stockfish Skill Level</h2>
+          <h2 className="text-sm font-medium mb-2 text-slate-200">Stockfish Skill Level</h2>
           <Slider
             value={[skillLevel]}
             onValueChange={([value]) => setSkillLevel(value)}
             max={20}
             min={1}
             step={1}
-            className="w-full max-w-xs"
-          />
+            className="w-full max-w-xs border border-gray-300 rounded-lg"
+            />
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-6 bg-transparent shadow-black shadow-lg">
           <CardContent className="p-4">
             <ChessBoard position={game.fen()} onMove={(move) => makeMove(`${move.from}${move.to}`)} />
           </CardContent>
@@ -117,9 +117,11 @@ export default function PlayPage() {
             className="flex-1 max-w-xs"
             disabled={isThinking}
           />
+          <span className="border-slate-200 border rounded-md">
           <Button onClick={() => makeMove(userMove)} disabled={isThinking}>
             {isThinking ? "Thinking..." : "Make Move"}
           </Button>
+          </span>
         </div>
       </div>
     </div>
