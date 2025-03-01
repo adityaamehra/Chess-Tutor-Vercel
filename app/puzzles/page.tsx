@@ -115,34 +115,36 @@ export default function PuzzlesPage() {
     <div className="flex-1 p-6">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
-          <span className="text-2xl">♟️</span>
-          <h1 className="text-2xl font-bold">Chess Puzzle Solver</h1>
+          <span className="text-3xl font-bold text-white">♙</span>
+          <h1 className="text-2xl font-bold text-slate-200">Chess Puzzle Solver</h1>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Select Difficulty</h2>
-          <RadioGroup value={difficulty} onValueChange={setDifficulty} className="flex gap-4">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="easy" id="easy" />
-              <Label htmlFor="easy">Easy</Label>
+        <div className="flex justify-between">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-2 text-slate-200">Select Difficulty</h2>
+            <RadioGroup value={difficulty} onValueChange={setDifficulty} className="flex gap-4">
+              <div className="flex items-center space-x-2 text-slate-200">
+                <RadioGroupItem value="easy" id="easy" className="text-slate-200 border-slate-200" />
+                <Label htmlFor="easy" className="text-slate-200">Easy</Label>
+              </div>
+              <div className="flex items-center space-x-2 text-slate-200">
+                <RadioGroupItem value="medium" id="medium" className="text-slate-200 border-slate-200" />
+                <Label htmlFor="medium" className="text-slate-200">Medium</Label>
+              </div>
+              <div className="flex items-center space-x-2 text-slate-200">
+                <RadioGroupItem value="hard" id="hard" className="text-slate-200 border-slate-200" />
+                <Label htmlFor="hard" className="text-slate-200">Hard</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="mb-4 text-right">
+              <h3 className="text-lg font-semibold text-slate-200">Puzzle Rating: {puzzleRating}</h3>
+              <h3 className="text-xl font-bold text-slate-200">{game.turn() === "w" ? "White to move" : "Black to move"}</h3>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="medium" id="medium" />
-              <Label htmlFor="medium">Medium</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="hard" id="hard" />
-              <Label htmlFor="hard">Hard</Label>
-            </div>
-          </RadioGroup>
         </div>
-
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold">Puzzle Rating: {puzzleRating}</h3>
-              <h3 className="text-xl font-bold">{game.turn() === "w" ? "White to move" : "Black to move"}</h3>
-            </div>
+            
             <ChessBoard
               position={game.fen()}
               orientation={orientation}
@@ -173,7 +175,9 @@ export default function PuzzlesPage() {
             placeholder="Enter your move (e.g., e2e4)"
             className="flex-1"
           />
-          <Button onClick={() => handleMove(userMove)}>Submit Move</Button>
+          <span className="border-white border rounded-md">
+            <Button onClick={() => handleMove(userMove)}>Submit Move</Button>
+          </span>
           <Button variant="outline" onClick={giveHint}>
             Give Hint
           </Button>

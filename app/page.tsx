@@ -64,8 +64,8 @@ export default function ChatbotPage() {
     <div className="flex-1 p-6">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
-          <MessageSquare className="w-8 h-8" />
-          <h1 className="text-2xl font-bold">Chess Tutor AI</h1>
+          <MessageSquare className="w-8 h-8 text-slate-200" />
+          <h1 className="text-2xl font-bold text-slate-200">Chess Tutor AI</h1>
         </div>
 
         <Card className="mb-4 min-h-[400px]">
@@ -73,9 +73,7 @@ export default function ChatbotPage() {
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                  }`}
+                  className={`max-w-[80%] rounded-lg px-4 py-2 border text-slate-200 border-slate-200 bg-transparent`}
                 >
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
@@ -83,7 +81,7 @@ export default function ChatbotPage() {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-muted rounded-lg px-4 py-2">
+                <div className="text-slate-200 border-slate-200 border bg-transparent rounded-lg px-4 py-2">
                   <ReactMarkdown>Thinking...</ReactMarkdown>
                 </div>
               </div>
@@ -99,9 +97,11 @@ export default function ChatbotPage() {
             disabled={isLoading}
             className="flex-1"
           />
-          <Button type="submit" disabled={isLoading}>
-            Send
-          </Button>
+          <span className="border-slate-200 border rounded-md">
+            <Button type="submit" disabled={isLoading}>
+              Send
+            </Button>
+          </span>
         </form>
 
         <div className="mt-4 text-sm text-muted-foreground">

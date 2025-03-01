@@ -38,13 +38,15 @@ export function ChessBoard({ position = "start", onMove, orientation = "white", 
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <Chessboard
-        position={game.fen()}
-        onPieceDrop={(from, to) => makeMove({ from, to })}
-        boardOrientation={orientation}
-        arePiecesDraggable={draggable}
-      />
+    <div className="w-6/12 max-w-2xl mx-auto">
+      <div className="border-4 border-black shadow-gray-950 shadow-md">
+        <Chessboard
+          position={game.fen()}
+          onPieceDrop={(from, to) => makeMove({ from, to })}
+          boardOrientation={orientation}
+          arePiecesDraggable={draggable}
+        />
+      </div>
     </div>
   )
 }
