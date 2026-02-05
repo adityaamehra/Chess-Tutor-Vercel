@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const { message } = await req.json();
 
     const chat_completion = await client.chat.completions.create({
-      model: "deepseek-r1-distill-llama-70b", // Use a valid Groq model
+      model: "llama-3.3-70b-versatile", // Use a valid Groq model
       messages: [
         {
           role: "system",

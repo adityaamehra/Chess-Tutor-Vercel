@@ -90,7 +90,7 @@ export async function POST(req: Request) {
               content: `Analyze this chess position where ${moveType} (${info.bestMove}) with evaluation: ${evaluation}`,
             },
           ],
-          model: "deepseek-r1-distill-llama-70b",
+          model: "llama-3.3-70b-versatile",
         })
 
         return NextResponse.json({
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
               content: move,
             },
           ],
-          model: "deepseek-r1-distill-llama-70b",
+          model: "llama-3.3-70b-versatile",
         })
 
         return NextResponse.json({
@@ -133,7 +133,7 @@ export async function POST(req: Request) {
               content: `Assess the move "${move}" in the given position: ${fen}`,
             },
           ],
-          model: "deepseek-r1-distill-llama-70b",
+          model: "llama-3.3-70b-versatile",
         })
 
         return NextResponse.json({
